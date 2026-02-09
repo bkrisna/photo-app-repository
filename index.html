@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Repo</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; background: #f4f4f4; }
+        .gallery { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
+            gap: 15px; 
+            padding: 20px; 
+        }
+        .gallery img { width: 100%; height: 200px; object-fit: cover; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .upload-section { background: white; padding: 20px; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+    <div class="upload-section">
+        <h2>My Photo Repository</h2>
+        <input type="file" id="photoInput">
+        <button onclick="uploadPhoto()">Upload Photo</button>
+    </div>
+
+    <div class="gallery" id="gallery"></div>
+
+    <script>
+        const gallery = document.getElementById('gallery');
+
+        // Load existing photos
+        async function loadPhotos() {
+            const res = await fetch('http://localhost:5000/photos');
+            const data = await res.json();
+            gallery.innerHTML = data.map(p => `<img src="${p.url}">`).join('');
+        }
+
+        // Upload a new photo
+        async function uploadPhoto() {
+            const fileInput = document.getElementById('photoInput');
+            if (!fileInput.files[0]) return alert("Please select a file");
+
+            const formData = new FormData();
+            formData.append('photo', fileInput.files[0]);
+
+            await fetch('http://localhost:5000/upload', { method: 'POST', body: formData });
+            fileInput.value = ''; // Clear input
+            loadPhotos(); // Refresh gallery
+        }
+
+        loadPhotos();
+    </script>
+</body>
+</html>
